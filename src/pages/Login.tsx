@@ -48,7 +48,7 @@ export default function Login() {
           <div className="flex h-14 w-14 items-center justify-center rounded-xl gradient-primary shadow-glow mb-4">
             <Linkedin className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-foreground">LinkedIn Engine</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">Calyn</h1>
           <p className="text-sm text-muted-foreground mt-1">Your AI-powered content engine</p>
         </div>
 

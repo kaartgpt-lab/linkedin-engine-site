@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { OnboardingState, ToneProfile, ROLE_OPTIONS, GOAL_OPTIONS, FREQUENCY_OPTIONS, PILLAR_OPTIONS } from '@/types';
-import { brandProfileApi, contentPillarApi } from '@/services/api';
+import { brandProfileApi } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 // Step components
@@ -84,7 +84,9 @@ export default function Onboarding() {
     setIsSubmitting(true);
     
     try {
-      // Prepare brand profile data
+      // Prepare brand profile data with content pillars included
+      const allPillars = [...state.contentPillars, ...state.customPillars];
+      
       const profileData = {
         name: `${state.name}'s Brand Profile`,
         roles: state.selectedRoles.map(role => ({
@@ -99,6 +101,7 @@ export default function Onboarding() {
         })),
         primaryRole: state.selectedRoles[0] || '',
         goals: state.goals,
+        contentPillars: allPillars,
         postingFrequency: state.postingFrequency,
         toneProfile: state.toneProfile,
         admiredCreators: state.admiredCreators.filter(Boolean),
@@ -109,17 +112,8 @@ export default function Onboarding() {
         additionalInfo: state.additionalInfo,
       };
 
-      // Create brand profile
-      const { profile } = await brandProfileApi.create(profileData);
-
-      // Create content pillars
-      const allPillars = [...state.contentPillars, ...state.customPillars];
-      for (const pillar of allPillars) {
-        await contentPillarApi.create({
-          name: pillar,
-          brand_profile_id: profile.id,
-        });
-      }
+      // Create brand profile (content pillars are now included in one API call)
+      await brandProfileApi.create(profileData);
 
       toast({
         title: 'Profile Created!',

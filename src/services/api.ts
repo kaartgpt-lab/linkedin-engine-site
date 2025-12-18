@@ -1,6 +1,6 @@
 import { User, BrandProfile, ContentPillar, Post } from '@/types';
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = 'http://localhost:5050/api/v1';
 
 // Helper function for API calls
 async function apiCall<T>(
@@ -54,6 +54,21 @@ export const authApi = {
     }),
 
   getUser: () => apiCall<{ user: User }>('/users'),
+
+  forgotPassword: (email: string) =>
+    apiCall<{ message: string }>('/password/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+
+  verifyResetToken: (token: string) =>
+    apiCall<{ valid: boolean; email: string }>(`/password/verify-token/${token}`),
+
+  resetPassword: (token: string, password: string) =>
+    apiCall<{ message: string }>('/password/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    }),
 };
 
 // Brand Profile API
@@ -86,7 +101,10 @@ export const contentPillarApi = {
   create: (data: { name: string; brand_profile_id: string }) =>
     apiCall<{ pillar: ContentPillar }>('/content-pillar', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ 
+        pillar_name: data.name, 
+        brand_profile_id: parseInt(data.brand_profile_id, 10) 
+      }),
     }),
 
   getByProfile: (profileId: string) =>
@@ -103,7 +121,7 @@ export const calendarApi = {
   generate: (profileId: string) =>
     apiCall<{ posts: Post[] }>('/generate/calendar', {
       method: 'POST',
-      body: JSON.stringify({ brand_profile_id: profileId }),
+      body: JSON.stringify({ brand_profile_id: parseInt(profileId, 10) }),
     }),
 
   getPostsByProfile: (profileId: string) =>
@@ -118,6 +136,12 @@ export const calendarApi = {
   deletePost: (id: string) =>
     apiCall<{ message: string }>(`/posts/${id}`, {
       method: 'DELETE',
+    }),
+
+  regeneratePost: (id: string, pillar?: string) =>
+    apiCall<{ post: Post; message: string }>(`/posts/${id}/regenerate`, {
+      method: 'POST',
+      body: JSON.stringify({ pillar }),
     }),
 };
 

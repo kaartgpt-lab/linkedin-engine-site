@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthState } from '@/types';
-import { authApi, mockData } from '@/services/api';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { AuthState } from '@/types';
+import { authApi } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType extends AuthState {
@@ -20,19 +20,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for existing session
+    // Check for existing session on mount
     const checkAuth = async () => {
       try {
         const { user } = await authApi.getUser();
         setState({ user, isAuthenticated: true, isLoading: false });
-      } catch {
-        // For development, check localStorage for mock auth
-        const mockAuth = localStorage.getItem('mockAuth');
-        if (mockAuth) {
-          setState({ user: mockData.user, isAuthenticated: true, isLoading: false });
-        } else {
-          setState({ user: null, isAuthenticated: false, isLoading: false });
-        }
+        console.log('✅ Authenticated with backend:', user.email);
+      } catch (error) {
+        console.log('❌ Not authenticated or backend unavailable');
+        setState({ user: null, isAuthenticated: false, isLoading: false });
       }
     };
     checkAuth();
@@ -42,17 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { user } = await authApi.login({ email, password });
       setState({ user, isAuthenticated: true, isLoading: false });
+      localStorage.removeItem('mockAuth'); // Clear mock auth if using real backend
       toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
       return true;
-    } catch {
-      // Mock login for development
-      if (email && password) {
-        localStorage.setItem('mockAuth', 'true');
-        setState({ user: { ...mockData.user, email }, isAuthenticated: true, isLoading: false });
-        toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
-        return true;
-      }
-      toast({ title: 'Login failed', description: 'Invalid credentials', variant: 'destructive' });
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({ 
+        title: 'Login failed', 
+        description: error instanceof Error ? error.message : 'Invalid credentials', 
+        variant: 'destructive' 
+      });
       return false;
     }
   };
@@ -61,21 +56,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { user } = await authApi.register({ name, email, password });
       setState({ user, isAuthenticated: true, isLoading: false });
+      localStorage.removeItem('mockAuth'); // Clear mock auth if using real backend
       toast({ title: 'Welcome!', description: 'Your account has been created.' });
       return true;
-    } catch {
-      // Mock register for development
-      if (name && email && password) {
-        localStorage.setItem('mockAuth', 'true');
-        setState({ 
-          user: { ...mockData.user, name, email }, 
-          isAuthenticated: true, 
-          isLoading: false 
-        });
-        toast({ title: 'Welcome!', description: 'Your account has been created.' });
-        return true;
-      }
-      toast({ title: 'Registration failed', description: 'Please try again', variant: 'destructive' });
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({ 
+        title: 'Registration failed', 
+        description: error instanceof Error ? error.message : 'Please try again', 
+        variant: 'destructive' 
+      });
       return false;
     }
   };

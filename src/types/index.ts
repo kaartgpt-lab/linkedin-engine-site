@@ -91,6 +91,7 @@ export interface BrandProfile {
   roles: UserRole[];
   primaryRole: string;
   goals: string[];
+  contentPillars: string[];
   postingFrequency: number;
   toneProfile: ToneProfile;
   admiredCreators: string[];

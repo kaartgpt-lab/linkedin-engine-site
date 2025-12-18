@@ -30,7 +30,7 @@ export function Navbar() {
             <Linkedin className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-display text-xl font-bold text-foreground">
-            LinkedIn Engine
+            Calyn
           </span>
         </Link>
 

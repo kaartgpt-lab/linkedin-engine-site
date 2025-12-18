@@ -23,6 +23,7 @@ export default function Calendar() {
   const { toast } = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [editedPost, setEditedPost] = useState<Partial<Post>>({});
 
@@ -49,10 +50,54 @@ export default function Calendar() {
 
   const handleSaveEdit = async () => {
     if (!selectedPost) return;
-    const updated = { ...selectedPost, ...editedPost };
-    setPosts(posts.map(p => p.id === selectedPost.id ? updated : p));
-    setSelectedPost(null);
-    toast({ title: 'Post Updated' });
+    
+    try {
+      const { post } = await calendarApi.updatePost(selectedPost.id, editedPost);
+      setPosts(posts.map(p => p.id === selectedPost.id ? post : p));
+      setSelectedPost(null);
+      toast({ 
+        title: 'Post Updated',
+        description: 'Your changes have been saved.'
+      });
+    } catch (error) {
+      toast({ 
+        title: 'Update Failed',
+        description: 'Could not save changes. Please try again.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleRegenerate = async () => {
+    if (!selectedPost) return;
+    
+    setIsRegenerating(true);
+    try {
+      const { post } = await calendarApi.regeneratePost(selectedPost.id, selectedPost.pillar);
+      
+      setPosts(posts.map(p => p.id === selectedPost.id ? post : p));
+      setSelectedPost(post);
+      setEditedPost({
+        hook: post.hook,
+        post_body: post.post_body,
+        cta: post.cta,
+        hashtags: post.hashtags,
+        image_idea: post.image_idea,
+      });
+      
+      toast({ 
+        title: 'Post Regenerated!',
+        description: 'Fresh content generated with AI.'
+      });
+    } catch (error) {
+      toast({ 
+        title: 'Regeneration Failed',
+        description: 'Could not regenerate post. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsRegenerating(false);
+    }
   };
 
   const openEditor = (post: Post) => {
@@ -206,9 +251,14 @@ export default function Calendar() {
                   <Check className="h-4 w-4" />
                   Approve
                 </Button>
-                <Button variant="outline" className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  Regenerate
+                <Button 
+                  variant="outline" 
+                  onClick={handleRegenerate}
+                  disabled={isRegenerating}
+                  className="gap-2"
+                >
+                  <RefreshCw className={cn("h-4 w-4", isRegenerating && "animate-spin")} />
+                  {isRegenerating ? 'Regenerating...' : 'Regenerate'}
                 </Button>
               </div>
             </div>
