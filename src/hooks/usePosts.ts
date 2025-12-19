@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tantml:react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { calendarApi } from '@/services/api';
 import { Post } from '@/types';
 import { useToast } from '@/hooks/use-toast';
