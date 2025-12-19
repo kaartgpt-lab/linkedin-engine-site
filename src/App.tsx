@@ -14,6 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
 import Calendar from "./pages/Calendar";
 import LinkedInConnect from "./pages/LinkedInConnect";
+import ProfileEdit from "./pages/ProfileEdit";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,12 @@ const App = () => (
             } />
             <Route path="/linkedin-connect" element={
               <ProtectedRoute><LinkedInConnect /></ProtectedRoute>
+            } />
+            <Route path="/profile/:profileId/edit" element={
+              <ProtectedRoute><ProfileEdit /></ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute><Settings /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
