@@ -448,7 +448,7 @@ export default function Settings() {
                     ))}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Theme switching coming soon. Currently using dark mode.
+                    Theme switching coming soon. Currently using light mode.
                   </p>
                 </div>
               </CardContent>
