@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/common/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ToastAction } from '@/components/ui/toast';
 import { 
   Plus, Calendar, Edit, Trash2, Sparkles, Target, 
   TrendingUp, Clock, CheckCircle2, Loader2 
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const [profiles, setProfiles] = useState<BrandProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [profilesWithCalendar, setProfilesWithCalendar] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchProfiles();
@@ -40,6 +42,23 @@ export default function Dashboard() {
     try {
       const { profiles: data } = await brandProfileApi.getMy();
       setProfiles(data);
+      
+      // Check which profiles have calendars
+      const calendarChecks = await Promise.all(
+        data.map(async (profile) => {
+          try {
+            const { exists } = await calendarApi.checkExists(profile.id);
+            return { id: profile.id, exists };
+          } catch {
+            return { id: profile.id, exists: false };
+          }
+        })
+      );
+      
+      const withCalendar = new Set(
+        calendarChecks.filter(c => c.exists).map(c => c.id)
+      );
+      setProfilesWithCalendar(withCalendar);
     } catch {
       // Use mock data for development
       setProfiles(mockData.profiles);
@@ -48,22 +67,60 @@ export default function Dashboard() {
     }
   };
 
-  const handleGenerateCalendar = async (profileId: string) => {
+  const handleGenerateCalendar = async (profileId: string, isRegenerate: boolean = false) => {
+    if (isRegenerate) {
+      // Show confirmation toast for regeneration
+      toast({
+        title: '✨ Regenerate Calendar?',
+        description: 'This will create a fresh 30-day calendar with new content ideas.',
+        action: (
+          <ToastAction
+            altText="Confirm regeneration"
+            onClick={() => {
+              performGeneration(profileId, true);
+            }}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Confirm
+          </ToastAction>
+        ),
+      });
+      return;
+    }
+
+    performGeneration(profileId, false);
+  };
+
+  const performGeneration = async (profileId: string, isRegenerate: boolean) => {
     setGeneratingId(profileId);
     try {
-      await calendarApi.generate(profileId);
+      await calendarApi.generate(profileId, isRegenerate);
+
+      // Update the set of profiles with calendars
+      setProfilesWithCalendar((prev) => new Set([...prev, profileId]));
+
       toast({
-        title: 'Calendar Generated!',
+        title: isRegenerate ? 'Calendar Regenerated!' : 'Calendar Generated!',
         description: 'Your 30-day content calendar is ready.',
       });
       navigate(`/calendar/${profileId}`);
-    } catch {
-      // For demo, navigate anyway with mock data
-      toast({
-        title: 'Calendar Generated!',
-        description: 'Your 30-day content calendar is ready.',
-      });
-      navigate(`/calendar/${profileId}`);
+    } catch (error: any) {
+      // Check if calendar already exists
+      if (error.message?.includes('already exists')) {
+        toast({
+          title: 'Calendar Already Exists',
+          description: 'Use the regenerate option to create a new calendar.',
+          variant: 'destructive',
+        });
+        setProfilesWithCalendar((prev) => new Set([...prev, profileId]));
+      } else {
+        // For demo, navigate anyway with mock data
+        toast({
+          title: isRegenerate ? 'Calendar Regenerated!' : 'Calendar Generated!',
+          description: 'Your 30-day content calendar is ready.',
+        });
+        navigate(`/calendar/${profileId}`);
+      }
     } finally {
       setGeneratingId(null);
     }
@@ -219,19 +276,19 @@ export default function Dashboard() {
                   {/* Actions */}
                   <div className="flex flex-wrap gap-2">
                     <Button 
-                      onClick={() => handleGenerateCalendar(profile.id)}
+                      onClick={() => handleGenerateCalendar(profile.id, profilesWithCalendar.has(profile.id))}
                       disabled={generatingId === profile.id}
                       className="flex-1 gap-2"
                     >
                       {generatingId === profile.id ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Generating...
+                          {profilesWithCalendar.has(profile.id) ? 'Regenerating...' : 'Generating...'}
                         </>
                       ) : (
                         <>
                           <Sparkles className="h-4 w-4" />
-                          Generate
+                          {profilesWithCalendar.has(profile.id) ? 'Regenerate' : 'Generate'}
                         </>
                       )}
                     </Button>
@@ -239,6 +296,7 @@ export default function Dashboard() {
                       variant="outline" 
                       size="icon"
                       onClick={() => navigate(`/calendar/${profile.id}`)}
+                      title="View Calendar"
                     >
                       <Calendar className="h-4 w-4" />
                     </Button>
@@ -246,12 +304,13 @@ export default function Dashboard() {
                       variant="outline" 
                       size="icon"
                       onClick={() => navigate(`/profile/${profile.id}/edit`)}
+                      title="Edit Profile"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="icon" className="text-destructive hover:text-destructive">
+                        <Button variant="outline" size="icon" className="text-destructive hover:text-destructive" title="Delete Profile">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>

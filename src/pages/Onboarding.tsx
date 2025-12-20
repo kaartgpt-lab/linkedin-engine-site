@@ -4,9 +4,11 @@ import { Navbar } from '@/components/common/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { 
+  ChevronLeft, ChevronRight, Sparkles, Loader2 
+} from 'lucide-react';
 import { OnboardingState, ToneProfile, ROLE_OPTIONS, GOAL_OPTIONS, FREQUENCY_OPTIONS, PILLAR_OPTIONS } from '@/types';
-import { brandProfileApi } from '@/services/api';
+import { brandProfileApi, calendarApi } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 // Step components
@@ -113,14 +115,30 @@ export default function Onboarding() {
       };
 
       // Create brand profile (content pillars are now included in one API call)
-      await brandProfileApi.create(profileData);
+      const { profile } = await brandProfileApi.create(profileData);
 
       toast({
         title: 'Profile Created!',
-        description: 'Your content brain is ready. Let\'s generate your calendar!',
+        description: 'Generating your 30-day content calendar...',
       });
 
-      navigate('/dashboard');
+      // Generate calendar automatically
+      try {
+        await calendarApi.generate(profile.id);
+        toast({
+          title: 'Calendar Generated!',
+          description: 'Your content calendar is ready to review.',
+        });
+        navigate(`/calendar/${profile.id}`);
+      } catch (calendarError) {
+        // If calendar generation fails, still go to dashboard
+        console.error('Calendar generation failed:', calendarError);
+        toast({
+          title: 'Profile Created!',
+          description: 'You can generate your calendar from the dashboard.',
+        });
+        navigate('/dashboard');
+      }
     } catch {
       // For demo, navigate anyway
       toast({
@@ -239,11 +257,14 @@ export default function Onboarding() {
               className="gap-2"
             >
               {isSubmitting ? (
-                'Creating...'
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating & Generating...
+                </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  Create Profile
+                  Create Profile & Generate Calendar
                 </>
               )}
             </Button>

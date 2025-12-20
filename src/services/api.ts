@@ -118,11 +118,19 @@ export const contentPillarApi = {
 
 // Calendar/Posts API
 export const calendarApi = {
-  generate: (profileId: string) =>
+  generate: (profileId: string, regenerate: boolean = false) =>
     apiCall<{ posts: Post[] }>('/generate/calendar', {
       method: 'POST',
-      body: JSON.stringify({ brand_profile_id: parseInt(profileId, 10) }),
+      body: JSON.stringify({ 
+        brand_profile_id: parseInt(profileId, 10),
+        regenerate 
+      }),
     }),
+
+  checkExists: (profileId: string) =>
+    apiCall<{ posts: Post[] }>(`/posts/profile/${profileId}`)
+      .then(response => ({ exists: response.posts.length > 0, count: response.posts.length }))
+      .catch(() => ({ exists: false, count: 0 })),
 
   getPostsByProfile: (profileId: string) =>
     apiCall<{ posts: Post[] }>(`/posts/profile/${profileId}`),
