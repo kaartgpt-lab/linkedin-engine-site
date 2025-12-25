@@ -68,9 +68,9 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="inline-flex items-center gap-2 bg-[#F0F4FF] text-[#4A7CFF] px-6 py-2 rounded-full font-semibold text-sm mb-8"
         >
-          <Quote size={16} />
+          <Quote size={10} />
           For Serious Builders
-          <Quote size={16} className="rotate-180" />
+          <Quote size={10} className="rotate-180" />
         </motion.div>
 
         {/* Headline */}
@@ -80,7 +80,7 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mb-6 flex flex-col items-center"
         >
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
+          <h1 className="mt-4 text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
             <span className="block mb-2 text-[#1A1F36]">Stop writing posts</span>
             <span className="block text-center">
               <TextFlip words={flipWords} className="text-[#4A7CFF]" />
@@ -93,7 +93,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-lg md:text-xl text-[#6B7280] mb-8 max-w-3xl mx-auto leading-relaxed"
+          className="text-l md:text-xl text-[#6B7280] mb-8 max-w-3xl mx-auto leading-relaxed"
         >
           You are too busy to wake up and ask, "What should I post today?" Calyn builds a full 30-day plan for you in
           minutes, based on your actual goals, not random viral templates.
@@ -104,7 +104,7 @@ const Hero = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.1, delay: 0.9 }}
+          transition={{ duration: 0.9, delay: 0.1 }}
           className="mb-8"
         >
           <InfiniteCarousel items={carouselItems} />
@@ -118,7 +118,7 @@ const Hero = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/register')}
-          className="bg-gradient-to-r from-[#4A7CFF] to-[#6B8FFF] text-white px-7 py-3 rounded-full font-bold text-lg shadow-2xl hover:shadow-3xl transition-all"
+          className="bg-gradient-to-r from-[#4A7CFF] to-[#6B8FFF] text-white px-7 py-3 rounded-full font-bold md:text-lg shadow-2xl hover:shadow-3xl transition-all"
         >
           Build My Plan
         </motion.button>

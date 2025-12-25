@@ -85,11 +85,7 @@ const Footer = () => {
                   Privacy Policy
                 </a>
               </li>
-              <li>
-                <a href="#" className="text-[#6B7280] hover:text-[#4A7CFF] transition-colors hover:underline">
-                  404
-                </a>
-              </li>
+              
             </ul>
           </motion.div>
         </div>
