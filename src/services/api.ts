@@ -151,6 +151,102 @@ export const calendarApi = {
       method: 'POST',
       body: JSON.stringify({ pillar }),
     }),
+
+  // New AI generation endpoints
+  generateSinglePost: (data: { 
+    brand_profile_id: string; 
+    role: string; 
+    pillar: string; 
+    topic?: string 
+  }) =>
+    apiCall<{ post: { 
+      role: string; 
+      hook: string; 
+      post_body: string; 
+      cta: string; 
+      hashtags: string[]; 
+      image_idea: string 
+    } }>('/generate/single-post', {
+      method: 'POST',
+      body: JSON.stringify({
+        brand_profile_id: parseInt(data.brand_profile_id, 10),
+        role: data.role,
+        pillar: data.pillar,
+        topic: data.topic
+      }),
+    }),
+
+  optimizeHooks: (data: { 
+    brand_profile_id: string; 
+    role: string; 
+    post_body: string 
+  }) =>
+    apiCall<{ hooks: string[] }>('/generate/optimize-hooks', {
+      method: 'POST',
+      body: JSON.stringify({
+        brand_profile_id: parseInt(data.brand_profile_id, 10),
+        role: data.role,
+        post_body: data.post_body
+      }),
+    }),
+
+  generateCTAs: (data: { 
+    brand_profile_id: string; 
+    role: string; 
+    post_body: string 
+  }) =>
+    apiCall<{ ctas: string[] }>('/generate/generate-ctas', {
+      method: 'POST',
+      body: JSON.stringify({
+        brand_profile_id: parseInt(data.brand_profile_id, 10),
+        role: data.role,
+        post_body: data.post_body
+      }),
+    }),
+
+  generateHashtags: (data: { 
+    brand_profile_id: string; 
+    role: string; 
+    post_body: string 
+  }) =>
+    apiCall<{ hashtags: string[] }>('/generate/generate-hashtags', {
+      method: 'POST',
+      body: JSON.stringify({
+        brand_profile_id: parseInt(data.brand_profile_id, 10),
+        role: data.role,
+        post_body: data.post_body
+      }),
+    }),
+
+  generateImageIdea: (data: { 
+    brand_profile_id: string; 
+    role: string; 
+    post_body: string 
+  }) =>
+    apiCall<{ image_idea: string }>('/generate/generate-image-idea', {
+      method: 'POST',
+      body: JSON.stringify({
+        brand_profile_id: parseInt(data.brand_profile_id, 10),
+        role: data.role,
+        post_body: data.post_body
+      }),
+    }),
+
+  transformPostStyle: (data: { 
+    brand_profile_id: string; 
+    role: string; 
+    post_body: string; 
+    style: 'shorten' | 'expand' | 'raw' | 'punchy' | 'story' 
+  }) =>
+    apiCall<{ post: string }>('/generate/transform-style', {
+      method: 'POST',
+      body: JSON.stringify({
+        brand_profile_id: parseInt(data.brand_profile_id, 10),
+        role: data.role,
+        post_body: data.post_body,
+        style: data.style
+      }),
+    }),
 };
 
 // Mock Data for Development
