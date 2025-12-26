@@ -1,13 +1,15 @@
 import { User, BrandProfile, ContentPillar, Post } from '@/types';
 
-const API_BASE_URL = 'http://localhost:5050/api/v1';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
+const API_VERSION = '/api/v1';
+const API_FULL_URL = `${API_BASE_URL}${API_VERSION}`;
 
 // Helper function for API calls
 async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${API_FULL_URL}${endpoint}`;
   
   const config: RequestInit = {
     ...options,
